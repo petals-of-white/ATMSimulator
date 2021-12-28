@@ -4,22 +4,30 @@ namespace ATMLibrary
 {
     public class ATM
     {
-        private decimal moneyInATM = 10000;
+        private decimal moneyInATM;
+
+        public string Name;
         private BankAccount? selectedAccount;
         public bool Authorized { get; private set; }
-        public event EventHandler<EventArgs>? CardInsertedEvent;
-        public event EventHandler<EventArgs>? CardRemovedEvent;
-        public event EventHandler<EventArgs>? PinEnteredEvent;
-        public event EventHandler<EventArgs>? MoneyWithdrawnEvent;
+        public event EventHandler<BankAccount>? CardInsertedEvent;
+        public event EventHandler<BankAccount>? CardRemovedEvent;
+        public event EventHandler<BankAccount>? PinEnteredEvent;
+        public event EventHandler<decimal>? MoneyWithdrawnEvent;
+        public event EventHandler<BankAccount>? WrongPinEvent;
 
 
+        public ATM(decimal money, string name)
+        {
+            this.moneyInATM = money;
+            this.Name = name;
+        }
         public bool InsertCard(BankAccount bankCard)
         {
             bool res = false;
             if (selectedAccount == null)
             {
                 selectedAccount = bankCard;
-                CardInsertedEvent?.Invoke(this, new EventArgs());//
+                CardInsertedEvent?.Invoke(this, selectedAccount);//
                 return true;
             }
             return res;
@@ -30,11 +38,12 @@ namespace ATMLibrary
             if (pin == selectedAccount?.PIN)
             {
                 Authorized = true;
-                PinEnteredEvent?.Invoke(this, new EventArgs());
+                PinEnteredEvent?.Invoke(this, selectedAccount);
                 return true;
             }
             else
             {
+                WrongPinEvent?.Invoke(this, selectedAccount);
                 GiveCardBack();
                 return false;
             }
@@ -53,13 +62,13 @@ namespace ATMLibrary
             try
             {
                 selectedAccount?.WithdrawMoney(amountToWithdraw);
-                moneyInATM -=amountToWithdraw;
-                MoneyWithdrawnEvent?.Invoke(this, new EventArgs());
+                moneyInATM -= amountToWithdraw;
+                MoneyWithdrawnEvent?.Invoke(this, amountToWithdraw);
 
             }
             catch (ArgumentException ex)
             {
-                
+                throw;
             }
         }
         public bool GiveCardBack()
@@ -69,12 +78,9 @@ namespace ATMLibrary
             {
                 //Вихід
                 Authorized = false;
+                CardRemovedEvent?.Invoke(this, selectedAccount);//
                 selectedAccount = null;
-
                 res = true;
-
-                CardRemovedEvent?.Invoke(this, new EventArgs());//
-
             }
             return res;
         }

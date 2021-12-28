@@ -9,7 +9,7 @@ namespace ATMLibrary.BankAccounts
         private string pin;
 
         internal List<Transaction> transactions = new();
-        internal TransactionValidator Validator = new TransactionValidator();
+        internal ITransactionValidator Validator = new TransactionValidator();
         public string AccountNumber { get; init; }
         internal string PIN { get => pin; set => pin = value; }
 

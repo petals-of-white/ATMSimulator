@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ATMLibrary.BankAccounts;
+﻿using ATMLibrary.BankAccounts;
 
 namespace ATMLibrary.Validators
 {
-    internal class TransactionValidator
+    internal class TransactionValidator : ITransactionValidator
     {
-        internal void ValidateWithdrawal(BankAccount account, decimal amountToWithdraw)
+        public void ValidateWithdrawal(BankAccount account, decimal amountToWithdraw)
         {
             if (amountToWithdraw > account.Balance)
             {
@@ -17,7 +12,7 @@ namespace ATMLibrary.Validators
             }
         }
 
-        internal void ValidateDepositAddition(BankAccount account, decimal amount)
+        public void ValidateDepositAddition(BankAccount account, decimal amount)
         {
             //Validating deposit addition
         }
