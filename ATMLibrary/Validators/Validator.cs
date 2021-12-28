@@ -1,4 +1,4 @@
-﻿namespace ATMLibrary
+﻿namespace ATMLibrary.Validators
 {
     public class Validator
     {

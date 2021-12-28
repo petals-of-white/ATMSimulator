@@ -1,42 +1,79 @@
-﻿namespace ATMLibrary
+﻿using ATMLibrary.BankAccounts;
+
+namespace ATMLibrary
 {
     public class ATM
     {
-        public event EventHandler<EventArgs>? cardInsertedEvent;
-        public event EventHandler<EventArgs>? cardRemovedEvent;
-
-
+        private decimal moneyInATM = 10000;
         private BankAccount? selectedAccount;
+        public bool Authorized { get; private set; }
+        public event EventHandler<EventArgs>? CardInsertedEvent;
+        public event EventHandler<EventArgs>? CardRemovedEvent;
+        public event EventHandler<EventArgs>? PinEnteredEvent;
+        public event EventHandler<EventArgs>? MoneyWithdrawnEvent;
+
+
         public bool InsertCard(BankAccount bankCard)
         {
             bool res = false;
             if (selectedAccount == null)
             {
                 selectedAccount = bankCard;
-                cardInsertedEvent?.Invoke(this, new EventArgs());//
+                CardInsertedEvent?.Invoke(this, new EventArgs());//
                 return true;
             }
-
             return res;
-
         }
+
+        public bool EnterPIN(string pin)
+        {
+            if (pin == selectedAccount?.PIN)
+            {
+                Authorized = true;
+                PinEnteredEvent?.Invoke(this, new EventArgs());
+                return true;
+            }
+            else
+            {
+                GiveCardBack();
+                return false;
+            }
+        }
+
         public decimal? GetBalance()
         {
-            return selectedAccount?.Balance;
+            if (Authorized == true)
+                return selectedAccount?.Balance;
+            else return null;
         }
 
-        public void WithdrawMoney(decimal amountOfMoney)
+
+        public void WithdrawMoney(decimal amountToWithdraw)
         {
-            selectedAccount?.WithdrawMoney(amountOfMoney);
+            try
+            {
+                selectedAccount?.WithdrawMoney(amountToWithdraw);
+                moneyInATM -=amountToWithdraw;
+                MoneyWithdrawnEvent?.Invoke(this, new EventArgs());
+
+            }
+            catch (ArgumentException ex)
+            {
+                
+            }
         }
         public bool GiveCardBack()
         {
             bool res = false;
             if (selectedAccount != null)
             {
-                res = true;
+                //Вихід
+                Authorized = false;
                 selectedAccount = null;
-                cardInsertedEvent?.Invoke(this, new EventArgs());//
+
+                res = true;
+
+                CardRemovedEvent?.Invoke(this, new EventArgs());//
 
             }
             return res;
